@@ -40,18 +40,18 @@ module Gossiperl
         end
 
         def digest_to_binary digest
-          transport = Gossiperl::Client::Thrift::MemoryBufferTransport.new()
+          transport = ::Thrift::MemoryBufferTransport.new()
           protocol = ::Thrift::BinaryProtocol.new(transport)
           digest.write( protocol )
-          protocol.trans.get_buf.force_encoding('UTF-8')
+          protocol.trans.read( protocol.trans.available ).force_encoding('UTF-8')
         end
 
         def digest_from_binary digest_type, bin_digest
           begin
-            in_transport = Gossiperl::Client::Thrift::MemoryBufferTransport.new( bin_digest )
-            in_protocol = ::Thrift::BinaryProtocol.new(in_transport)
+            transport = ::Thrift::MemoryBufferTransport.new( bin_digest )
+            protocol = ::Thrift::BinaryProtocol.new(transport)
             digest = self.digest_type_class(digest_type).new
-            digest.read( in_protocol )
+            digest.read( protocol )
             return { :ok => digest }
           rescue Exception => ex
             return { :error => ex }
