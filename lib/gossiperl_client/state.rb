@@ -22,7 +22,7 @@ module Gossiperl
             if Time.now.to_i - state.last_ts > 5
               if self.connected
                 # Announce disconnected
-                puts "State: Disconnected"
+                state.worker.process_event( { :event => :disconnected } )
                 self.connected = false
               end
             end
@@ -33,7 +33,7 @@ module Gossiperl
       def receive digest_ack
         unless self.connected
           # Announce connected
-          puts "State: Connected"
+          self.worker.process_event( { :event => :connected } )
         end
         self.connected = true
         self.last_ts = digest_ack.heartbeat

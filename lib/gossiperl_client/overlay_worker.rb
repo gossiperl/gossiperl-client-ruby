@@ -9,9 +9,10 @@ module Gossiperl
       field :state, Gossiperl::Client::State
       field :working, [FalseClass,TrueClass]
 
-      def initialize options={}
+      def initialize options={}, block
         self.options = options
         self.working = true
+        @callback_block = block
       end
 
       def start
@@ -25,6 +26,14 @@ module Gossiperl
       def current_state
         return :connected if self.state.connected
         return :disconnected
+      end
+
+      def process_event event
+        unless @callback_block.nil?
+          @callback_block.call( event.merge( { :options => self.options } ) )
+        else
+          puts "Event received: #{event}"
+        end
       end
       
     end

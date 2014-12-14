@@ -9,7 +9,7 @@ module Gossiperl
         if block_given?
           self.connections[ options[:name] ] = Gossiperl::Client::OverlayWorker.new(options, block)
         else
-          self.connections[ options[:name] ] = Gossiperl::Client::OverlayWorker.new(options)
+          self.connections[ options[:name] ] = Gossiperl::Client::OverlayWorker.new(options, nil)
         end
         self.connections[ options[:name] ].start
       end

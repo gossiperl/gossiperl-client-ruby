@@ -6,8 +6,13 @@ module Gossiperl
       field :worker, Gossiperl::Client::OverlayWorker
       field :transport, Gossiperl::Client::Transport::Udp
 
-      def initialize worker
+      def initialize worker, &block
         self.worker = worker
+        @callback_block = block
+      end
+
+      def get_callback_block
+        @callback_block
       end
 
       def start
@@ -16,27 +21,32 @@ module Gossiperl
           msg.transport.handle do |data|
             if data.kind_of? Hash
               if data.has_key?(:error)
-                # handle error
+                msg.worker.process_event( { :event => :failed, :error => data[:error] } )
               elsif data.has_key?(:forward)
-                # handle forward, forward message to the client and reply with digestForwardedAck
+                msg.worker.process_event( { :event => :forwarded, :digest => data[:envelope], :digest_type => data[:type] } )
+                msg.digest_forwarded_ack data[:envelope].id
               else
-                puts "Unsupported hash type response #{data}"
+                msg.worker.process_event( { :event => :failed, :error => { :unsupported_hash_response => data } } )
               end
             else
               if data.is_a?( Gossiperl::Client::Thrift::Digest )
-                puts "Reply with digest ack"
+                msg.digest_ack data
               elsif data.is_a?( Gossiperl::Client::Thrift::DigestAck )
                 msg.worker.state.receive data
               elsif data.is_a?( Gossiperl::Client::Thrift::DigestEvent )
-                puts "member_... type of event"
+                msg.worker.process_event( { :event => :event, :details => { :type => data.event_type,
+                                                                            :event_object => data.event_object,
+                                                                            :heartbeat => data.heartbeat } } )
               elsif data.is_a?( Gossiperl::Client::Thrift::DigestSubscribeAck )
-                puts "Confirmation of subscription"
+                msg.worker.process_event( { :event => :subscribed, :details => { :types => data.event_types,
+                                                                                 :heartbeat => data.heartbeat } } )
               elsif data.is_a?( Gossiperl::Client::Thrift::DigestUnsubscribeAck )
-                puts "Confirmation of subscription removal"
+                msg.worker.process_event( { :event => :unsubscribed, :details => { :types => data.event_types,
+                                                                                   :heartbeat => data.heartbeat } } )
               elsif data.is_a?( Gossiperl::Client::Thrift::DigestForwardedAck )
-                puts "Digest forwarded"
+                msg.worker.process_event( { :event => :forwarded_ack, :details => { :reply_id => data.reply_id } } )
               else
-                puts "Received unsupported #{data}"
+                msg.worker.process_event( { :event => :failed, :error => { :unsupported_digest => data } } )
               end
             end
           end
@@ -45,6 +55,23 @@ module Gossiperl
 
       def send digest
         self.transport.send digest
+      end
+
+      def digest_ack digest
+        ack = ::Gossiperl::Client::Thrift::DigestAck.new
+        ack.name = self.worker.options[:client_name]
+        ack.heartbeat = Time.now.to_i
+        ack.reply_id = digest.id
+        ack.membership = []
+        self.send ack
+      end
+
+      def digest_forwarded_ack digest_id
+        ack = ::Gossiperl::Client::Thrift::DigestForwardedAck.new
+        ack.name = self.worker.options[:client_name]
+        ack.reply_id = digest_id
+        ack.secret = self.worker.options[:client_secret]
+        self.send ack
       end
 
     end
