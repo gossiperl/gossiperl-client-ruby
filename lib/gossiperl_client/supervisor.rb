@@ -7,12 +7,14 @@ module Gossiperl
 
       def connect options, &block
         ::Gossiperl::Client::Util::Validation.validate_connect( options )
+        overlay_name = options[:overlay_name].to_sym
+        raise ArgumentError.new("Client for #{overlay_name} already present.") if self.connections.has_key?(overlay_name)
         if block_given?
-          self.connections[ options[:overlay_name].to_sym ] = ::Gossiperl::Client::OverlayWorker.new(self, options, block)
+          self.connections[ overlay_name ] = ::Gossiperl::Client::OverlayWorker.new(self, options, block)
         else
-          self.connections[ options[:overlay_name].to_sym ] = ::Gossiperl::Client::OverlayWorker.new(self, options, nil)
+          self.connections[ overlay_name ] = ::Gossiperl::Client::OverlayWorker.new(self, options, nil)
         end
-        self.connections[ options[:overlay_name].to_sym ].start
+        self.connections[ overlay_name ].start
       end
 
       def disconnect overlay_name
