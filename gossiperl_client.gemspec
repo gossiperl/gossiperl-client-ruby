@@ -10,6 +10,7 @@ Gem::Specification.new do |s|
   s.description   = "Work with gossiperl from Ruby."
   s.authors       = ["Rad Gruchalski"]
   s.email         = ["radek@gruchalski.com"]
+  s.license       = "MIT"
   s.homepage      = "https://github.com/radekg/gossiperl-client-ruby"
   s.require_paths = %w[lib]
 

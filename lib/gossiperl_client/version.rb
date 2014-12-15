@@ -2,7 +2,7 @@
 module Gossiperl
   module Client
     module Version
-      VERSION = '0.1.0'
+      VERSION = '0.1.1'
       MAJOR, MINOR, TINY = VERSION.split('.')
     end
   end
