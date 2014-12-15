@@ -1,6 +1,5 @@
 # encoding: ascii-8bit
 require 'socket'
-
 module Gossiperl
   module Client
     module Transport
@@ -17,15 +16,15 @@ module Gossiperl
           self.worker = worker
           self.serializer = Gossiperl::Client::Serialization::Serializer.new
           self.encryption = Gossiperl::Client::Encryption::Aes256.new(
-                                                self.worker.options[:symkey],
-                                                self.worker.options[:iv] )
+                                                self.worker.options[:symkey].to_s,
+                                                self.worker.options[:iv].to_s )
         end
 
         def handle &block
           worker = Thread.new ({ :proto => self, :block => block }) do |args|
             begin
               args[:proto].socket = UDPSocket.new
-              args[:proto].socket.bind "127.0.0.1", args[:proto].worker.options[:client_port]
+              args[:proto].socket.bind '127.0.0.1', args[:proto].worker.options[:client_port]
               while args[:proto].worker.working
                 begin
                   data, address = args[:proto].socket.recvfrom args[:proto].recv_buf_size
@@ -36,22 +35,18 @@ module Gossiperl
                   args[:block].call({ :error => ex })
                 end
               end
-              # log socket is stopped...
+              self.socket.close unless self.socket.nil?
+              args[:proto].worker.logger.debug("Stopping UDP services for client #{args[:proto].worker.options[:client_name]}.")
             rescue Exception => e
-              # log could not bind
+              args[:proto].worker.logger.error("Could not bind UDP service for client #{args[:proto].worker.options[:client_name]}.")
             end
           end
-        end
-
-        def stop
-          self.working = false
-          self.socket.close unless self.socket.nil?
         end
       
         def send digest
           serialized = self.serializer.serialize digest
           encrypted  = self.encryption.encrypt serialized
-          self.socket.send encrypted, 0, "127.0.0.1", self.worker.options[:overlay_port]
+          self.socket.send encrypted, 0, '127.0.0.1', self.worker.options[:overlay_port]
         end
       end
     end

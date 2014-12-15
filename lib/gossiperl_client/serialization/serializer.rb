@@ -1,6 +1,5 @@
 # encoding: ascii-8bit
-require "thrift"
-
+require 'thrift'
 module Gossiperl
   module Client
     module Serialization
@@ -20,7 +19,7 @@ module Gossiperl
         end
 
         def deserialize bin_digest
-          envelope_resp = self.digest_from_binary("digestEnvelope", bin_digest)
+          envelope_resp = self.digest_from_binary('digestEnvelope', bin_digest)
           if envelope_resp.has_key?(:ok)
             embedded_type = self.digest_type_class( envelope_resp[:ok].payload_type )
             if embedded_type == :forward
@@ -60,18 +59,18 @@ module Gossiperl
 
         def digest_type_class digest_type
           types = {
-            "digestError" => Gossiperl::Client::Thrift::DigestError,
-            "digestForwardedAck" => Gossiperl::Client::Thrift::DigestForwardedAck,
-            "digestEnvelope" => Gossiperl::Client::Thrift::DigestEnvelope,
-            "digest" => Gossiperl::Client::Thrift::Digest,
-            "digestAck" => Gossiperl::Client::Thrift::DigestAck,
-            "digestSubscriptions" => Gossiperl::Client::Thrift::DigestSubscriptions,
-            "digestExit" => Gossiperl::Client::Thrift::DigestExit,
-            "digestSubscribe" => Gossiperl::Client::Thrift::DigestSubscribe,
-            "digestSubscribeAck" => Gossiperl::Client::Thrift::DigestSubscribeAck,
-            "digestUnsubscribe" => Gossiperl::Client::Thrift::DigestUnsubscribe,
-            "digestUnsubscribeAck" => Gossiperl::Client::Thrift::DigestUnsubscribeAck,
-            "digestEvent" => Gossiperl::Client::Thrift::DigestEvent
+            'digestError' => Gossiperl::Client::Thrift::DigestError,
+            'digestForwardedAck' => Gossiperl::Client::Thrift::DigestForwardedAck,
+            'digestEnvelope' => Gossiperl::Client::Thrift::DigestEnvelope,
+            'digest' => Gossiperl::Client::Thrift::Digest,
+            'digestAck' => Gossiperl::Client::Thrift::DigestAck,
+            'digestSubscriptions' => Gossiperl::Client::Thrift::DigestSubscriptions,
+            'digestExit' => Gossiperl::Client::Thrift::DigestExit,
+            'digestSubscribe' => Gossiperl::Client::Thrift::DigestSubscribe,
+            'digestSubscribeAck' => Gossiperl::Client::Thrift::DigestSubscribeAck,
+            'digestUnsubscribe' => Gossiperl::Client::Thrift::DigestUnsubscribe,
+            'digestUnsubscribeAck' => Gossiperl::Client::Thrift::DigestUnsubscribeAck,
+            'digestEvent' => Gossiperl::Client::Thrift::DigestEvent
           }
           return types[ digest_type ] if types.has_key? digest_type
           return :forward

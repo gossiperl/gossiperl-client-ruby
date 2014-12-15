@@ -33,6 +33,10 @@ module Gossiperl
       class Udp < Gossiperl::Client::Resolution; end
     end
 
+    module Util
+      class Validation; end
+    end
+
     class Messaging < Gossiperl::Client::Resolution; end
     class OverlayWorker < Gossiperl::Client::Resolution; end
     class State < Gossiperl::Client::Resolution; end

@@ -3,7 +3,7 @@ module Gossiperl
   module Client
     class Resolution
     
-      UNDEFINED_VALUE = "GOSSIPERL_UNDEFINED_VALUE"
+      UNDEFINED_VALUE = 'GOSSIPERL_UNDEFINED_VALUE'
 
       def self.field(name, types, default_value=Resolution::UNDEFINED_VALUE)
         name = name.to_s

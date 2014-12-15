@@ -15,7 +15,7 @@ module Gossiperl
         end
         
         def algorithm
-          "AES-256-CBC"
+          'AES-256-CBC'
         end
 
         def encrypt data
