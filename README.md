@@ -6,7 +6,8 @@ Ruby [gossiperl](https://github.com/radekg/gossiperl) client library.
 
 In your `Gemfile`:
 
-    gem 'gossiperl_client', :git => 'https://github.com/radekg/gossiperl-client-ruby.git'
+    source 'http://rubygems.org/'
+    gem 'gossiperl_client'
 
 ## Running
 
