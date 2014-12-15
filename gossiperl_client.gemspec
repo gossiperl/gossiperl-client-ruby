@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.homepage      = "https://github.com/radekg/gossiperl-client-ruby"
   s.require_paths = %w[lib]
 
-  s.add_dependency('thrift', '>=0.9.2')
+  s.add_dependency('thrift', '>=0.9.2.0')
   s.add_development_dependency('shindo')
   
   s.files = %w[
