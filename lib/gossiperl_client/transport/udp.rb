@@ -15,9 +15,7 @@ module Gossiperl
         def initialize worker
           self.worker = worker
           self.serializer = Gossiperl::Client::Serialization::Serializer.new
-          self.encryption = Gossiperl::Client::Encryption::Aes256.new(
-                                                self.worker.options[:symkey].to_s,
-                                                self.worker.options[:iv].to_s )
+          self.encryption = Gossiperl::Client::Encryption::Aes256.new( self.worker.options[:symkey].to_s )
         end
 
         def handle &block

@@ -28,6 +28,8 @@ module Gossiperl
               end
             end
           end
+          state.worker.process_event( { :event => :disconnected } )
+          self.connected = false
           state.worker.logger.info("Stopping state service for client #{state.worker.options[:client_name]}.")
         end
       end
@@ -56,12 +58,14 @@ module Gossiperl
         ::Gossiperl::Client::Util::Validation.validate_event_types( event_types )
         self.subscriptions = self.subscriptions + event_types
         self.worker.messaging.digest_subscribe(event_types) if self.connected
+        return self.subscriptions
       end
 
       def unsubscribe event_types
         ::Gossiperl::Client::Util::Validation.validate_event_types( event_types )
         self.subscriptions = self.subscriptions - event_types
         self.worker.messaging.digest_unsubscribe(event_types) if self.connected
+        return self.subscriptions
       end
 
     end

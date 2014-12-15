@@ -106,6 +106,15 @@ module Gossiperl
         self.send digest
       end
 
+      def digest_exit
+        digest = ::Gossiperl::Client::Thrift::DigestExit.new
+        digest.name = self.worker.options[:client_name].to_s
+        digest.heartbeat = Time.now.to_i
+        digest.secret = self.worker.options[:client_secret].to_s
+        self.send digest
+        self.worker.working = false
+      end
+
     end
   end
 end

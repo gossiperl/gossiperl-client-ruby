@@ -36,7 +36,10 @@ module Gossiperl
       end
 
       def stop
-        self.working = false
+        self.messaging.digest_exit
+        while self.state.connected
+          sleep 0.1
+        end
       end
 
       def current_state
@@ -58,6 +61,11 @@ module Gossiperl
 
       def unsubscribe event_types
         self.state.unsubscribe event_types
+      end
+
+      def send digest_type, digest_data
+        serialized = self.messaging.transport.serializer.serialize_arbitrary( digest_type, digest_data )
+        self.messaging.send serialized
       end
       
     end

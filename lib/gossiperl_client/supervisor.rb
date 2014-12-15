@@ -34,6 +34,15 @@ module Gossiperl
         end
       end
 
+      def state overlay_name
+        overlay_name = overlay_name.to_sym
+        if self.connections.has_key? overlay_name
+          self.connections[ overlay_name ].current_state
+        else
+          raise ArgumentError.new("[supervisor] No overlay connection: #{overlay_name}.")
+        end
+      end
+
       def subscribe overlay_name, event_types
         overlay_name = overlay_name.to_sym
         if self.connections.has_key? overlay_name
@@ -47,6 +56,15 @@ module Gossiperl
         overlay_name = overlay_name.to_sym
         if self.connections.has_key? overlay_name
           self.connections[ overlay_name ].unsubscribe event_types
+        else
+          raise ArgumentError.new("[supervisor] No overlay connection: #{overlay_name}.")
+        end
+      end
+
+      def send overlay_name, digest_type, digest_data
+        overlay_name = overlay_name.to_sym
+        if self.connections.has_key? overlay_name
+          self.connections[ overlay_name ].send digest_type, digest_data
         else
           raise ArgumentError.new("[supervisor] No overlay connection: #{overlay_name}.")
         end

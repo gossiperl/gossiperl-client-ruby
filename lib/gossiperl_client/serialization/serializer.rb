@@ -4,6 +4,34 @@ module Gossiperl
   module Client
     module Serialization
       class Serializer
+        include ::Thrift::Struct_Union
+
+        def serialize_arbitrary digest_type, digest_data
+          transport = ::Thrift::MemoryBufferTransport.new()
+          protocol = ::Thrift::BinaryProtocol.new(transport)
+          protocol.write_struct_begin(digest_type.to_s)
+          digest_data.each_key{|key|
+            value = digest_data[key][:value]
+            type  = self.type_to_thrift_type( digest_data[key][:type] )
+            unless value.nil?
+              if is_container? type
+                protocol.write_field_begin(key.to_s, digest_data[key][:value], digest_data[key][:field_id])
+                write_container( protocol, value, { :type => type, :name => key.to_s } )
+                protocol.write_field_end
+              else
+                protocol.write_field({ :type => type, :name => key.to_s }, digest_data[key][:field_id], value )
+              end
+            end
+          }
+          protocol.write_field_stop
+          protocol.write_struct_end
+
+          envelope = Gossiperl::Client::Thrift::DigestEnvelope.new
+          envelope.payload_type = digest_type.to_s
+          envelope.bin_payload = protocol.trans.read( protocol.trans.available ).force_encoding('UTF-8')
+          envelope.id = SecureRandom.uuid.to_s
+          self.digest_to_binary( envelope )
+        end
 
         def serialize digest
           digest_type = digest.class.name.split('::').last
@@ -74,6 +102,24 @@ module Gossiperl
           }
           return types[ digest_type ] if types.has_key? digest_type
           return :forward
+        end
+
+        def type_to_thrift_type type
+          return ({
+                      :stop => ::Thrift::Types::STOP,
+                      :void => ::Thrift::Types::VOID,
+                      :bool => ::Thrift::Types::BOOL,
+                      :byte => ::Thrift::Types::BYTE,
+                      :double => ::Thrift::Types::DOUBLE,
+                      :i16 => ::Thrift::Types::I16,
+                      :i32 => ::Thrift::Types::I32,
+                      :i64 => ::Thrift::Types::I64,
+                      :string => ::Thrift::Types::STRING,
+                      :struct => ::Thrift::Types::STRUCT,
+                      :map => ::Thrift::Types::MAP,
+                      :set => ::Thrift::Types::SET,
+                      :list => ::Thrift::Types::LIST,
+                    })[ type.to_sym ]
         end
 
       end

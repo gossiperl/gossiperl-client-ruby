@@ -7,10 +7,10 @@ module Gossiperl
 
         def self.validate_connect options
           raise ArgumentError.new('Options must be a Hash.') unless options.kind_of?(Hash)
-          [ :overlay_name, :client_name, :client_secret, :overlay_port, :client_port, :symkey, :iv ].each {|opt|
+          [ :overlay_name, :client_name, :client_secret, :overlay_port, :client_port, :symkey ].each {|opt|
             raise ArgumentError.new("Required option #{opt} missing.") unless options.has_key?(opt)
           }
-          [ :overlay_name, :client_name, :client_secret, :symkey, :iv ].each {|str_opt|
+          [ :overlay_name, :client_name, :client_secret, :symkey ].each {|str_opt|
             raise TypeError.new("Option #{str_opt} must be a String or Symbol.") unless [String, Symbol].include?( options[str_opt].class )
           }
           [ :overlay_port, :client_port ].each {|fixnum_opt|
