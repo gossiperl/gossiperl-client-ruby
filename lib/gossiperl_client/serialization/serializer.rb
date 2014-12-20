@@ -1,5 +1,6 @@
 # encoding: ascii-8bit
 require 'thrift'
+require 'base64'
 module Gossiperl
   module Client
     module Serialization
@@ -28,7 +29,7 @@ module Gossiperl
 
           envelope = Gossiperl::Client::Thrift::DigestEnvelope.new
           envelope.payload_type = digest_type.to_s
-          envelope.bin_payload = protocol.trans.read( protocol.trans.available ).force_encoding('UTF-8')
+          envelope.bin_payload = Base64.strict_encode64( protocol.trans.read( protocol.trans.available ).force_encoding('UTF-8') )
           envelope.id = SecureRandom.uuid.to_s
           self.digest_to_binary( envelope )
         end
@@ -41,7 +42,7 @@ module Gossiperl
           end
           envelope = Gossiperl::Client::Thrift::DigestEnvelope.new
           envelope.payload_type = digest_type
-          envelope.bin_payload = self.digest_to_binary( digest )
+          envelope.bin_payload = Base64.strict_encode64( self.digest_to_binary( digest ) )
           envelope.id = SecureRandom.uuid.to_s
           self.digest_to_binary( envelope )
         end
@@ -55,7 +56,9 @@ module Gossiperl
                        :type => envelope_resp[:ok].payload_type,
                        :envelope => envelope_resp[:ok] }
             else
-              payload = digest_from_binary(envelope_resp[:ok].payload_type, envelope_resp[:ok].bin_payload)
+              payload = digest_from_binary(
+                            envelope_resp[:ok].payload_type,
+                            Base64.strict_decode64( envelope_resp[:ok].bin_payload ) )
               if payload.has_key?(:ok)
                 return payload[:ok]
               else
