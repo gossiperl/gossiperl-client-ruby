@@ -103,10 +103,8 @@ Or in a block:
       :property => { :value => <value>, :type => <thrift-type-as-string>, :field_id => <field-order> }
     } )
 
-Where `:type` is one of the Thrift types:
+Where `:type` is one of the supported Thrift types:
 
-- `:stop`
-- `:void`
 - `:bool`
 - `:byte`
 - `:double`
@@ -114,10 +112,6 @@ Where `:type` is one of the Thrift types:
 - `:i32`
 - `:i64`
 - `:string`
-- `:struct`
-- `:map`
-- `:set`
-- `:list`
 
 And `:field_id` is a Thrift field ID.
 
