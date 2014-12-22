@@ -70,6 +70,9 @@ module Gossiperl
         rescue ArgumentError => e
           process_event( { :event => :failed,
                            :error => { :serialize_arbitrary => e } } )
+        rescue StandardError => e2
+          process_event( { :event => :failed,
+                           :error => { :serialize_arbitrary => e2 } } )
         end
       end
       
