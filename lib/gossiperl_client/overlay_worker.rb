@@ -64,8 +64,13 @@ module Gossiperl
       end
 
       def send digest_type, digest_data
-        serialized = self.messaging.transport.serializer.serialize_arbitrary( digest_type, digest_data )
-        self.messaging.send serialized
+        begin
+          serialized = self.messaging.transport.serializer.serialize_arbitrary( digest_type, digest_data )
+          self.messaging.send serialized
+        rescue ArgumentError => e
+          process_event( { :event => :failed,
+                           :error => { :serialize_arbitrary => e } } )
+        end
       end
       
     end
