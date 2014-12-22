@@ -5,7 +5,6 @@ module Gossiperl
   module Client
     module Serialization
       class Serializer
-        include ::Thrift::Struct_Union
 
         def serialize_arbitrary digest_type, digest_data
           transport = ::Thrift::MemoryBufferTransport.new()
@@ -14,14 +13,10 @@ module Gossiperl
           digest_data.each_key{|key|
             value = digest_data[key][:value]
             type  = self.type_to_thrift_type( digest_data[key][:type] )
-            unless value.nil?
-              if is_container? type
-                protocol.write_field_begin(key.to_s, digest_data[key][:value], digest_data[key][:field_id])
-                write_container( protocol, value, { :type => type, :name => key.to_s } )
-                protocol.write_field_end
-              else
-                protocol.write_field({ :type => type, :name => key.to_s }, digest_data[key][:field_id], value )
-              end
+            unless type.nil?
+              protocol.write_field({ :type => type, :name => key.to_s }, digest_data[key][:field_id], value )
+            else
+              raise ArgumentError.new("Unsupported serializable type #{digest_data[key][:type]} for field #{key.to_s}.")
             end
           }
           protocol.write_field_stop
@@ -108,21 +103,17 @@ module Gossiperl
         end
 
         def type_to_thrift_type type
-          return ({
-                      :stop => ::Thrift::Types::STOP,
-                      :void => ::Thrift::Types::VOID,
+          type = type.to_sym
+          serializable_thrift_types = {
                       :bool => ::Thrift::Types::BOOL,
                       :byte => ::Thrift::Types::BYTE,
                       :double => ::Thrift::Types::DOUBLE,
                       :i16 => ::Thrift::Types::I16,
                       :i32 => ::Thrift::Types::I32,
                       :i64 => ::Thrift::Types::I64,
-                      :string => ::Thrift::Types::STRING,
-                      :struct => ::Thrift::Types::STRUCT,
-                      :map => ::Thrift::Types::MAP,
-                      :set => ::Thrift::Types::SET,
-                      :list => ::Thrift::Types::LIST,
-                    })[ type.to_sym ]
+                      :string => ::Thrift::Types::STRING }
+          return (serializable_thrift_types)[ type ] if serializable_thrift_types.has_key? type
+          return nil
         end
 
       end
