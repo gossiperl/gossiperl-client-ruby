@@ -62,6 +62,16 @@ Shindo.tests('[Gossiperl] connect process') do
       @supervisor.connections == {}
     end
 
+    tests("custom_serialization").returns(true) do
+      digest_type = "someCustomDigest"
+      digest_data = {
+        :some_property => { :value => "some string property", :type => :string, :field_id => 1 },
+        :some_other_property => { :value => 1234, :type => :i32, :field_id => 2 },
+      }
+      binary_envelope = Gossiperl::Client::Serialization::Serializer.new.serialize_arbitrary(digest_type, digest_data)
+      true
+    end
+
   end
 
 end

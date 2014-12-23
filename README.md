@@ -115,6 +115,19 @@ Where `:type` is one of the supported Thrift types:
 
 And `:field_id` is a Thrift field ID.
 
+## reading custom digests:
+
+    supervisor.read( :digest_type, binary_envelope, digest_data )
+
+where `digest_data` is a `Hash` looking like this:
+
+    {
+      :property => { :type => <thrift-type-as-string>, :field_id => <field-order> },
+      :property => { :type => <thrift-type-as-string>, :field_id => <field-order> }
+    }
+
+Example available in `serialization_test.rb` file.
+
 ## Running tests
 
     shindont tests
