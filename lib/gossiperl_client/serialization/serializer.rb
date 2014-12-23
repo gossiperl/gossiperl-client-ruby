@@ -42,6 +42,48 @@ module Gossiperl
           self.digest_to_binary( envelope )
         end
 
+        def deserialize_arbitrary digest_type, binary_digest, digest_info
+          envelope_resp = self.digest_from_binary('digestEnvelope', binary_digest)
+          if envelope_resp.has_key?(:ok)
+            transport = ::Thrift::MemoryBufferTransport.new( Base64.strict_decode64( envelope_resp[:ok].bin_payload ) )
+            protocol = ::Thrift::BinaryProtocol.new(transport)
+            result = {}
+            protocol.read_struct_begin
+            digest_info.each{|field_info|
+              fname, ftype, fid = protocol.read_field_begin
+              property = get_fid_data fid, digest_info
+              if property.nil?
+                # skip field:
+                protocol.skip ftype
+              else
+                if type_to_thrift_type( property[:type] ) == ftype
+                  if property[:type] == :string
+                    result[ property[:name] ] = protocol.read_string
+                  elsif property[:type] == :bool
+                    result[ property[:name] ] = protocol.read_bool
+                  elsif property[:type] == :byte
+                    result[ property[:name] ] = protocol.read_byte
+                  elsif property[:type] == :double
+                    result[ property[:name] ] = protocol.read_double
+                  elsif property[:type] == :i16
+                    result[ property[:name] ] = protocol.read_i16
+                  elsif property[:type] == :i32
+                    result[ property[:name] ] = protocol.read_i32
+                  elsif property[:type] == :i64
+                    result[ property[:name] ] = protocol.read_i64
+                  else
+                    protocol.skip ftype
+                  end
+                else
+                  protocol.skip ftype
+                end
+              end
+            }
+            return result
+          end
+          return { :error => :not_thrift_envelope }
+        end
+
         def deserialize bin_digest
           envelope_resp = self.digest_from_binary('digestEnvelope', bin_digest)
           if envelope_resp.has_key?(:ok)
@@ -61,7 +103,7 @@ module Gossiperl
               end
             end
           end
-          return { :error => :not_thrift }
+          return { :error => :not_thrift_envelope }
         end
 
         def digest_to_binary digest
@@ -113,6 +155,15 @@ module Gossiperl
                       :i64 => ::Thrift::Types::I64,
                       :string => ::Thrift::Types::STRING }
           return (serializable_thrift_types)[ type ] if serializable_thrift_types.has_key? type
+          return nil
+        end
+
+        def get_fid_data fid, digest_info
+          digest_info.keys.each {|k|
+            if digest_info[k][:field_id] == fid
+              return { :name => k, :type => digest_info[k][:type] }
+            end
+          }
           return nil
         end
 

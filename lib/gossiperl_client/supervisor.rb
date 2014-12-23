@@ -72,6 +72,10 @@ module Gossiperl
         end
       end
 
+      def read digest_type, binary_envelope, digest_info
+        Gossiperl::Client::Serialization::Serializer.new.deserialize_arbitrary( digest_type, binary_envelope, digest_info )
+      end
+
       def stop
         self.connections.keys.each_value {|ow|
           ow.stop
