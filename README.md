@@ -1,6 +1,6 @@
 # Ruby gossiperl client
 
-Ruby [gossiperl](https://github.com/radekg/gossiperl) client library.
+Ruby [gossiperl](http://gossiperl.com) client library.
 
 ## Installation
 

@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.authors       = ["Rad Gruchalski"]
   s.email         = ["radek@gruchalski.com"]
   s.license       = "MIT"
-  s.homepage      = "https://github.com/radekg/gossiperl-client-ruby"
+  s.homepage      = "https://github.com/gossiperl/gossiperl-client-ruby"
   s.require_paths = %w[lib]
 
   s.add_dependency('thrift', '>=0.9.2.0')
