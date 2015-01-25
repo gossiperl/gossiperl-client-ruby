@@ -13,7 +13,7 @@ before_install:
   - sudo /etc/gossiperl/start-and-wait.sh
   - sudo /etc/gossiperl/test-overlay.sh
 
-script: shindont tests
+script: bundle exec shindont tests
 
 notifications:
   email: false
